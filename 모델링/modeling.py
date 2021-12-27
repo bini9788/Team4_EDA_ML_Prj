@@ -9,7 +9,9 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import cross_val_score
 
-from optuna import trial
+from optuna import Trial
+import optuna
+from optuna.samplers import TPESampler
 
 '''
     - 카테고리: 데이터 전처리
@@ -36,15 +38,6 @@ def encode_column(df, col_name):
         return df[col_name]
 
 
-'''
-    - 카테고리: 파라미터 튜닝
-    - 개요: 최적 파라미터 탐색
-    - param: 
-    - return: 
-'''
-def objective(trial):
-    pass
-
 
 '''
     rmse 값 도출
@@ -60,31 +53,34 @@ def RMSE(y, y_pred):
         - 교차 검증 방법으로 TimeSeriesSplit 수행
     - param: 
 
-        1. model_list => ex. [('LR', LinearRegression()), ('RF', RandomForestRegressor())]
+        1. model_tuple => ex. ('LR', LinearRegression())
         2. X_train, y_train, X_test, y_test
 
-    - return: None
+    - return: rmse
 '''
-def execute_modeling(model_list, X_train, y_train, X_test, y_test):
+def execute_modeling(model_tuple, X_train, y_train, X_test, y_test):
 
-    for name, model in model_list: 
+    name = model_tuple[0]
+    model = model_tuple[1]
 
-        # 각 모델에 대하여 실질적 학습 수행
-        clf = model.fit(X_train, y_train)
-        pred = clf.predict(X_test)
+    # 각 모델에 대하여 실질적 학습 수행
+    clf = model.fit(X_train, y_train)
+    pred = clf.predict(X_test)
 
-        # 각 모델의 rmse 점수 도출 
-        rmse = RMSE(y_test, pred)
-        print(f'{name} rmse: {rmse}')
+    # 각 모델의 rmse 점수 도출 
+    rmse = RMSE(y_test, pred)
+    print(f'{name} rmse: {rmse}')
 
-        # TimeSeries Cross validation 
-        tscv = TimeSeriesSplit(n_splits=15)
+    # TimeSeries Cross validation 
+    tscv = TimeSeriesSplit(n_splits=15)
 
-        # 각 모델에 대하여 교차 검증한 결과 점수 확인
-        # scoring parameter option 어캐 줘야 함?
-        cv_results = cross_val_score(model, X_train, y_train, cv=tscv, scoring='neg_mean_squared_error')
-        cv_results = np.sqrt(-cv_results)
-        print('%s: %f (%f)' % (name, cv_results.mean(), cv_results.std()))
+    # 각 모델에 대하여 교차 검증한 결과 점수 확인
+    # scoring parameter option 어캐 줘야 함?
+    cv_results = cross_val_score(model, X_train, y_train, cv=tscv, scoring='neg_mean_squared_error')
+    cv_results = np.sqrt(-cv_results)
+    print('%s: %f (%f)' % (name, cv_results.mean(), cv_results.std()))
+
+    return rmse
 
 
 
@@ -95,11 +91,12 @@ if __name__ == '__main__':
     import xgboost as xgb
     import lightgbm as lgb
 
-    # test encode_column function
+    # 1. test encode_column function
     train_df = pd.read_csv('dataset/train_data.csv')
     # print(encode_column(train_df, '건축년도'))
 
-    # test execute_modeling function
+
+    # 2. test execute_modeling function
     preprocessed_train_df = pd.read_csv('dataset/standard_dataset.csv').drop('Unnamed: 0', axis=1)
     preprocessed_train_df = preprocessed_train_df.drop_duplicates()
 
@@ -115,4 +112,44 @@ if __name__ == '__main__':
                     ('model_lgb', lgb.LGBMRegressor(n_estimators=500, max_depth=9, min_child_weight=5, n_jobs=-1))
                 ]
 
-    execute_modeling(model_list, X_train, y_train, X_test, y_test)
+    for model_tuple in model_list:
+        # print(execute_modeling(model_tuple, X_train, y_train, X_test, y_test))
+        pass
+
+
+    # 3. test get_best_param function
+    def object(trial:Trial, X_train, y_train, X_test, y_test):
+        params = {
+            "n_estimators" : trial.suggest_int('n_estimators', 500, 4000),
+            'max_depth':trial.suggest_int('max_depth', 8, 16),
+            'min_child_weight':trial.suggest_int('min_child_weight', 1, 300),
+            'gamma':trial.suggest_int('gamma', 1, 3),
+            'learning_rate': 0.01,
+            'colsample_bytree':trial.suggest_discrete_uniform('colsample_bytree',0.5, 1, 0.1),
+            'nthread' : -1,
+            'tree_method': 'gpu_hist',
+            'predictor': 'gpu_predictor',
+            'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
+            'alpha': trial.suggest_loguniform('alpha', 1e-3, 10.0),
+            'subsample': trial.suggest_categorical('subsample', [0.6,0.7,0.8,1.0] ),
+            'random_state': 42
+        }
+        
+        test_model = xgb.XGBRegressor(**params)
+        test_model_score = execute_modeling(('XGBR', test_model), X_train, y_train, X_test, y_test)
+
+        return test_model_score
+
+    study = optuna.create_study(direction='minimize', sampler=TPESampler())
+    study.optimize(lambda trial: object(trial, X_train, y_train, X_test, y_test), n_trials=10)
+
+    best_score = study.best_value
+    best_param_dict = study.best_trial.params
+
+    # print(best_score, best_param_dict)
+
+    # 하이퍼파라미터별 중요도를 확인할 수 있는 그래프
+    optuna.visualization.plot_param_importances(study)
+
+    # 하이퍼파라미터 최적화 과정을 확인
+    optuna.visualization.plot_optimization_history(study)
