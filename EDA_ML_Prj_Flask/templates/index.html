@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>서울시 아파트 실거래가 예측 서비스</title>
+  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+  <!-- body style="background: #000;"-->
+  <div class="login">
+    <h1>아파트 실거래가 예측</h1>
+
+    <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict')}}" method="post">
+      구 <input type="text" name="gu" placeholder="구" required="required" /><p>
+      동 <input type="text" name="dong" placeholder="동" required="required" /><p>
+      단지명 <input type="text" name="danji" placeholder="단지명" required="required" /><p>
+      건축년도 <input type="text" name="completionYear" placeholder="건축년도" required="required" /><p>
+      층 <input type="text" name="floor" placeholder="층" required="required" /><p>
+          
+      <button type="submit" class="btn btn-primary btn-block btn-large">가격 확인하기</button>
+    </form>
+
+    <br>
+    <br>
+    {{ prediction_text }}
+
+  </div>
+</body>
+
+</html>
