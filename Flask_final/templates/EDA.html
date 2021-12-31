@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>서울시 아파트 실거래가 예측 서비스</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/starter-template.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+	   /*구글 웹 폰트 적용*/
+	   @import url(//fonts.googleapis.com/earlyaccess/jejugothic.css);
+    	 *{
+    		font-family: 'Jeju Gothic', sans-serif;
+    	}
+    </style>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">Saltlux 4th team</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index">Home</a></li>
+            <li class="active"><a href="EDA">데이터 EDA</a></li>
+            <li><a href="modeling">모델링</a></li>
+            <li><a href="predict">모형 성능 확인하기</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
+    <!-- Main jumbotron for primary marketing message or call to action -->
+    <div class="jumbotron">
+      <h1>데이터 EDA 및 시각화 </h1>
+      <p> 타겟 변수인 평당단가와 각 독립변수들 간의 상관관계를 시각화</p>
+    </div>
+    <div class="page-header">
+      <h3>평당 단가와 서울특별시 행정동 상관관계 </h3>
+    </div>
+    <div class="container">
+      <div class="starter-template" style="text-align: center;">
+        <table >
+          <tr>
+            <td><img alt="2_평당단가_상위10개동.png" src="{{ url_for('static', filename='image/2_평당단가_상위10개동.png') }}" title="2_평당단가_상위10개동.png" width="400px"/></td>
+            <td><img alt="3_평당단가_하위10개동.png" src="{{ url_for('static', filename='image/3_평당단가_하위10개동.png') }}" title="3_평당단가_하위10개동.png" width="400px"/></td>
+          <tr>
+        </table>
+        <br>
+        <p style="text-align: left;" class="lead"> 강남구 개포동의 평당단가가 평균적으로 가장 높고 중구 장충동2가의 평당단가가 평균적으로 가장 낮음을 보여준다.
+        </p>
+    </div>
+    </div>
+    <div class="page-header">
+      <h3>평당 단가와 서울특별시 행정구역간 상관관계 </h3>
+    </div>
+    <div class="container">
+      <div class="starter-template">
+        <table>
+          <tr>
+            <td><img alt="4-1_평당단가_구및년도.png" src="{{ url_for('static', filename='image/4-1_평당단가_구및년도.png') }}" title="4-1_평당단가_구및년도.png" width="400px"/></td>
+            <!-- <td><img alt="3_평당단가_하위10개동.png" src="{{ url_for('static', filename='image/3_평당단가_하위10개동.png') }}" title="3_평당단가_하위10개동.png" width="400px"/></td> -->
+          <tr>
+        </table>
+        <br>
+        <p style="text-align: left;" class="lead"> 강남구 평당단가가 평균적으로 가장 높고 증가 폭만 다를 뿐 모든 구에서 년도별 평균 평당단가가 꾸준히 증가하고 있음을 보여준다.
+        </p>
+    </div>
+    </div>
+    <div class="page-header">
+      <h3>평당 단가와 아파트 완공년도간 상관관계 </h3>
+    </div>
+    <div class="container">
+      <div class="starter-template">
+        <table>
+          <tr>
+            <td><img alt="5_건축년도.png" src="{{ url_for('static', filename='image/5_건축년도.png') }}" title="5_건축년도.png" width="400px"/></td>
+            <!-- <td><img alt="3_평당단가_하위10개동.png" src="{{ url_for('static', filename='image/3_평당단가_하위10개동.png') }}" title="3_평당단가_하위10개동.png" width="400px"/></td> -->
+          <tr>
+        </table>
+        <br>
+        <p style="text-align: left;" class="lead"> 건축 년도가 1995년 이후인 아파트는 신축 아파트일수록 평균 평당단가가 높고
+          건축 년도가 1995년 이전인 아파트임에도 평균 평당단가가 눈에 띄게 높은 건축년도가 존재함을 알 수 있다.
+        </p>
+      </div>
+    </div>
+    <div class="page-header">
+      <h3>평당 단가와 아파트 이름간 상관관계 </h3>
+    </div>
+    <div class="container">
+      <div class="starter-template">
+        <table>
+          <tr>
+            <td><img alt="6_평당단가_단지명브랜드.png" src="{{ url_for('static', filename='image/6_평당단가_단지명브랜드.png') }}" title="6_평당단가_단지명브랜드.png" width="400px"/></td>
+          <tr>
+        </table>
+        <br>
+        <p style="text-align: left;" class="lead"> '자이' 브랜드의 평당단가가 가장 높은 것을 알 수 있다.
+        </p>
+      </div>
+    </div>
+    <div class="page-header">
+      <h3>평당 단가와 아파트 층간 상관관계 </h3>
+    </div>
+    <div class="container">
+      <div class="starter-template">
+        <table>
+          <tr>
+            <td><img alt="7_층.png" src="{{ url_for('static', filename='image/7_층.png') }}" title="7_층.png" width="400px"/></td>
+          <tr>
+        </table>
+        <br>
+        <p style="text-align: left;" class="lead"> 대체로 층 수가 높아질수록 평균 평당 단가가 높아진다.
+        </p>
+      </div>
+    </div>
+    <div class="page-header">
+      <h3>평당 단가와 계약날짜간 상관관계 </h3>
+    </div>
+    <div class="container">
+      <div class="starter-template">
+        <table>
+          <tr>
+            <td><img alt="8_계약일자.png" src="{{ url_for('static', filename='image/8_계약일자.png') }}" title="8_계약일자.png" width="400px"/></td>
+          <tr>
+        </table>
+        <br>
+        <p style="text-align: left;" class="lead"> 대체로 층 수가 높아질수록 평균 평당 단가가 높아지는 것을 알 수 있다.
+        </p>
+      </div>
+    </div>
+    <div class="page-header">
+      <h3>변수별 상관관계 그래프</h3>
+    </div>
+    <div class="container">
+      <div class="starter-template">
+        <table>
+          <tr>
+            <td><img alt="10_heatmap.png" src="{{ url_for('static', filename='image/10_heatmap.png') }}" title="10_heatmap.png" width="600px"/></td>
+          <tr>
+        </table>
+        <br>
+        <p style="text-align: left;" class="lead"> 대체로 층 수가 높아질수록 평균 평당 단가가 높아지는 것을 알 수 있다.
+        </p>
+      </div>
+    </div>
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
